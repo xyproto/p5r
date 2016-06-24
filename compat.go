@@ -28,17 +28,22 @@ func (re *Regexp) ReplaceAllString(input, replacement string) string {
 	return output
 }
 
-// Compile a string to a Regexp
-func MustCompile(input string) *Regexp {
-	return MustCompile2(input, 0)
-}
-
 // Compile a string to a Regexp, returns an error if something went wrong
 func Compile(input string) (*Regexp, error) {
 	return Compile2(input, 0)
 }
 
+// Compile a string to a Regexp
+func MustCompile(input string) *Regexp {
+	return MustCompile2(input, 0)
+}
+
 // Convert a p5r.Regex to a regexp.Regexp
-func (re *Regexp) Regexp() (*goregexp.Regexp, error) {
+func (re *Regexp) Convert() (*goregexp.Regexp, error) {
 	return goregexp.Compile(re.pattern)
+}
+
+// Convert a p5r.Regex to a regexp.Regexp
+func (re *Regexp) MustConvert() *goregexp.Regexp {
+	return goregexp.MustCompile(re.pattern)
 }
