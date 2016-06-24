@@ -1,5 +1,7 @@
 # P5R
 
+<img src="https://raw.github.com/xyproto/p5r/master/logo.png" style="margin-left: 2em">
+
 This is a fork of [regexp2](https://github.com/dlclark/regexp2).
 
 The motivation is to make Perl 5 compatible regular expressions available to [Otto](https://github.com/robertkrimen/otto), an implementation of JavaScript for Go.
@@ -18,3 +20,8 @@ if isMatch := re.MatchString(`Something to match`); isMatch {
 ```
 
 For more documentation, take a look at the [regexp2](https://github.com/dlclark/regexp2) README.md.
+
+
+---
+
+License: MIT
