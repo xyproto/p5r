@@ -9,7 +9,7 @@ import (
 )
 
 func TestBacktrack_CatastrophicTimeout(t *testing.T) {
-	r, err := Compile("(.+)*\\?", 0)
+	r, err := Compile2("(.+)*\\?", 0)
 	r.MatchTimeout = time.Millisecond * 1
 	t.Logf("code dump: %v", r.code.Dump())
 	m, err := r.FindStringMatch("Do you think you found the problem string!")
@@ -43,7 +43,7 @@ func TestSetInCode(t *testing.T) {
 }
 
 func TestRegexp_Basic(t *testing.T) {
-	r, err := Compile("test(?<named>ing)?", 0)
+	r, err := Compile2("test(?<named>ing)?", 0)
 	//t.Logf("code dump: %v", r.code.Dump())
 
 	if err != nil {
@@ -285,36 +285,36 @@ func TestGroups_Basic(t *testing.T) {
 
 func TestErr_GroupName(t *testing.T) {
 	// group 0 is off limits
-	if _, err := Compile("foo(?<0>bar)", 0); err == nil {
+	if _, err := Compile2("foo(?<0>bar)", 0); err == nil {
 		t.Fatalf("zero group, expected error during compile")
 	} else if want, got := "error parsing regexp: capture number cannot be zero in `foo(?<0>bar)`", err.Error(); want != got {
 		t.Fatalf("invalid error text, want '%v', got '%v'", want, got)
 	}
-	if _, err := Compile("foo(?'0'bar)", 0); err == nil {
+	if _, err := Compile2("foo(?'0'bar)", 0); err == nil {
 		t.Fatalf("zero group, expected error during compile")
 	} else if want, got := "error parsing regexp: capture number cannot be zero in `foo(?'0'bar)`", err.Error(); want != got {
 		t.Fatalf("invalid error text, want '%v', got '%v'", want, got)
 	}
 
 	// group tag can't start with a num
-	if _, err := Compile("foo(?<1bar>)", 0); err == nil {
+	if _, err := Compile2("foo(?<1bar>)", 0); err == nil {
 		t.Fatalf("invalid group name, expected error during compile")
 	} else if want, got := "error parsing regexp: invalid group name: group names must begin with a word character and have a matching terminator in `foo(?<1bar>)`", err.Error(); want != got {
 		t.Fatalf("invalid error text, want '%v', got '%v'", want, got)
 	}
-	if _, err := Compile("foo(?'1bar')", 0); err == nil {
+	if _, err := Compile2("foo(?'1bar')", 0); err == nil {
 		t.Fatalf("invalid group name, expected error during compile")
 	} else if want, got := "error parsing regexp: invalid group name: group names must begin with a word character and have a matching terminator in `foo(?'1bar')`", err.Error(); want != got {
 		t.Fatalf("invalid error text, want '%v', got '%v'", want, got)
 	}
 
 	// missing closing group tag
-	if _, err := Compile("foo(?<bar)", 0); err == nil {
+	if _, err := Compile2("foo(?<bar)", 0); err == nil {
 		t.Fatalf("invalid group name, expected error during compile")
 	} else if want, got := "error parsing regexp: invalid group name: group names must begin with a word character and have a matching terminator in `foo(?<bar)`", err.Error(); want != got {
 		t.Fatalf("invalid error text, want '%v', got '%v'", want, got)
 	}
-	if _, err := Compile("foo(?'bar)", 0); err == nil {
+	if _, err := Compile2("foo(?'bar)", 0); err == nil {
 		t.Fatalf("invalid group name, expected error during compile")
 	} else if want, got := "error parsing regexp: invalid group name: group names must begin with a word character and have a matching terminator in `foo(?'bar)`", err.Error(); want != got {
 		t.Fatalf("invalid error text, want '%v', got '%v'", want, got)
@@ -601,37 +601,37 @@ func TestHexadecimalCurlyBraces(t *testing.T) {
 		t.Fatalf("Expected match")
 	}
 
-	if _, err := Compile(`\x2R`, 0); err == nil {
+	if _, err := Compile2(`\x2R`, 0); err == nil {
 		t.Fatal("Expected error")
 	}
-	if _, err := Compile(`\x0`, 0); err == nil {
+	if _, err := Compile2(`\x0`, 0); err == nil {
 		t.Fatal("Expected error")
 	}
-	if _, err := Compile(`\x`, 0); err == nil {
+	if _, err := Compile2(`\x`, 0); err == nil {
 		t.Fatal("Expected error")
 	}
-	if _, err := Compile(`\x{`, 0); err == nil {
+	if _, err := Compile2(`\x{`, 0); err == nil {
 		t.Fatal("Expected error")
 	}
-	if _, err := Compile(`\x{2`, 0); err == nil {
+	if _, err := Compile2(`\x{2`, 0); err == nil {
 		t.Fatal("Expected error")
 	}
-	if _, err := Compile(`\x{2R`, 0); err == nil {
+	if _, err := Compile2(`\x{2R`, 0); err == nil {
 		t.Fatal("Expected error")
 	}
-	if _, err := Compile(`\x{2R}`, 0); err == nil {
+	if _, err := Compile2(`\x{2R}`, 0); err == nil {
 		t.Fatal("Expected error")
 	}
-	if _, err := Compile(`\x{}`, 0); err == nil {
+	if _, err := Compile2(`\x{}`, 0); err == nil {
 		t.Fatalf("Expected error")
 	}
-	if _, err := Compile(`\x{10000`, 0); err == nil {
+	if _, err := Compile2(`\x{10000`, 0); err == nil {
 		t.Fatal("Expected error")
 	}
-	if _, err := Compile(`\x{1234`, 0); err == nil {
+	if _, err := Compile2(`\x{1234`, 0); err == nil {
 		t.Fatal("Expected error")
 	}
-	if _, err := Compile(`\x{123456789}`, 0); err == nil {
+	if _, err := Compile2(`\x{123456789}`, 0); err == nil {
 		t.Fatal("Expected error")
 	}
 

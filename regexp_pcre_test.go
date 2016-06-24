@@ -231,7 +231,7 @@ func compileRawPattern(t *testing.T, pattern string) *Regexp {
 			problem(t, "PANIC in compiling \"%v\": %v", pattern, rec)
 		}
 	}()
-	re, err := Compile(pattern, opts)
+	re, err := Compile2(pattern, opts)
 	if err != nil {
 		problem(t, "Error parsing \"%v\": %v", pattern, err)
 	}

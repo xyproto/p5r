@@ -1049,7 +1049,7 @@ func TestMono_Basics(t *testing.T) {
 func runRegexTrial(t *testing.T, pattern string, options RegexOptions, input, expected string) {
 	result := ""
 
-	re, err := Compile(pattern, options)
+	re, err := Compile2(pattern, options)
 	if err != nil {
 		if expected != "Error." {
 			t.Errorf("Compiling pattern '%v' with options '%v' -- expected '%v' got '%v'", pattern, options, expected, err.Error())

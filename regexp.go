@@ -45,7 +45,7 @@ type Regexp struct {
 
 // Compile parses a regular expression and returns, if successful,
 // a Regexp object that can be used to match against text.
-func Compile(expr string, opt RegexOptions) (*Regexp, error) {
+func Compile2(expr string, opt RegexOptions) (*Regexp, error) {
 	// parse it
 	tree, err := syntax.Parse(expr, syntax.RegexOptions(opt))
 	if err != nil {
@@ -75,7 +75,7 @@ func Compile(expr string, opt RegexOptions) (*Regexp, error) {
 // It simplifies safe initialization of global variables holding compiled regular
 // expressions.
 func MustCompile2(str string, opt RegexOptions) *Regexp {
-	regexp, error := Compile(str, opt)
+	regexp, error := Compile2(str, opt)
 	if error != nil {
 		panic(`regexp2: Compile(` + quote(str) + `): ` + error.Error())
 	}
