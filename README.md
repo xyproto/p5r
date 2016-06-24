@@ -12,6 +12,10 @@ Like `regexp2`, this package does not have constant time guarantees like the `re
 
 `regexp2` was inspired by the regular expression implementation in .NET (which is released under an MIT license).
 
+The main difference from regexp2 is the renaming and modification of function signatures to be more compatible with how [Otto](https://github.com/robertkrimen/otto) is using regular expressions. 
+
+Example usage:
+
 ```go
 re := p5r.MustCompile(`Your pattern`)
 if isMatch := re.MatchString(`Something to match`); isMatch {
