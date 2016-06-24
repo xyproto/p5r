@@ -1,12 +1,12 @@
 /*
-Package regexp2 is a regexp package that has an interface similar to Go's framework regexp engine but uses a
+Package p5r is a regexp package that has an interface similar to Go's framework regexp engine but uses a
 more feature full regex engine behind the scenes.
 
 It doesn't have constant time guarantees, but it allows backtracking and is compatible with Perl5 and .NET.
 You'll likely be better off with the RE2 engine from the regexp package and should only use this if you
 need to write very complex patterns or require compatibility with .NET.
 */
-package regexp2
+package p5r
 
 import (
 	"errors"
@@ -15,7 +15,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/dlclark/regexp2/syntax"
+	"github.com/xyproto/p5r/syntax"
 )
 
 // Default timeout used when running regexp matches -- "forever"
@@ -199,7 +199,7 @@ func (re *Regexp) FindNextMatch(m *Match) (*Match, error) {
 
 // MatchString return true if the string matches the regex
 // error will be set if a timeout occurs
-func (re *Regexp) MatchString(s string) (bool, error) {
+func (re *Regexp) MatchString2(s string) (bool, error) {
 	m, err := re.run(true, -1, getRunes(s))
 	if err != nil {
 		return false, err

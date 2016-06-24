@@ -1,4 +1,4 @@
-package regexp2
+package p5r
 
 import (
 	"strings"
@@ -11,7 +11,7 @@ func BenchmarkLiteral(b *testing.B) {
 	re := MustCompile("y", 0)
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
-		if m, err := re.MatchString(x); !m || err != nil {
+		if m, err := re.MatchString2(x); !m || err != nil {
 			b.Fatalf("no match or error! %v", err)
 		}
 	}
@@ -23,7 +23,7 @@ func BenchmarkNotLiteral(b *testing.B) {
 	re := MustCompile(".y", 0)
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
-		if m, err := re.MatchString(x); !m || err != nil {
+		if m, err := re.MatchString2(x); !m || err != nil {
 			b.Fatalf("no match or error! %v", err)
 		}
 	}
@@ -35,7 +35,7 @@ func BenchmarkMatchClass(b *testing.B) {
 	re := MustCompile("[abcdw]", 0)
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
-		if m, err := re.MatchString(x); !m || err != nil {
+		if m, err := re.MatchString2(x); !m || err != nil {
 			b.Fatalf("no match or error! %v", err)
 		}
 
@@ -50,7 +50,7 @@ func BenchmarkMatchClass_InRange(b *testing.B) {
 	re := MustCompile("[ac]", 0)
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
-		if m, err := re.MatchString(x); !m || err != nil {
+		if m, err := re.MatchString2(x); !m || err != nil {
 			b.Fatalf("no match or error! %v", err)
 		}
 	}
@@ -73,7 +73,7 @@ func BenchmarkAnchoredLiteralShortNonMatch(b *testing.B) {
 	re := MustCompile("^zbc(d|e)", 0)
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
-		if m, err := re.MatchString(x); m || err != nil {
+		if m, err := re.MatchString2(x); m || err != nil {
 			b.Fatalf("unexpected match or error! %v", err)
 		}
 	}
@@ -105,7 +105,7 @@ func BenchmarkAnchoredShortMatch(b *testing.B) {
 	re := MustCompile("^.bc(d|e)", 0)
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
-		if m, err := re.MatchString(x); !m || err != nil {
+		if m, err := re.MatchString2(x); !m || err != nil {
 			b.Fatalf("no match or error! %v", err)
 		}
 	}
@@ -136,7 +136,7 @@ func BenchmarkOnePassShortA(b *testing.B) {
 	re := MustCompile("^.bc(d|e)*$", 0)
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
-		if m, err := re.MatchString(x); !m || err != nil {
+		if m, err := re.MatchString2(x); !m || err != nil {
 			b.Fatalf("no match or error! %v", err)
 		}
 	}
@@ -148,7 +148,7 @@ func BenchmarkNotOnePassShortA(b *testing.B) {
 	re := MustCompile(".bc(d|e)*$", 0)
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
-		if m, err := re.MatchString(x); !m || err != nil {
+		if m, err := re.MatchString2(x); !m || err != nil {
 			b.Fatalf("no match or error! %v", err)
 		}
 	}
@@ -160,7 +160,7 @@ func BenchmarkOnePassShortB(b *testing.B) {
 	re := MustCompile("^.bc(?:d|e)*$", 0)
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
-		if m, err := re.MatchString(x); !m || err != nil {
+		if m, err := re.MatchString2(x); !m || err != nil {
 			b.Fatalf("no match or error! %v", err)
 		}
 	}
@@ -172,7 +172,7 @@ func BenchmarkNotOnePassShortB(b *testing.B) {
 	re := MustCompile(".bc(?:d|e)*$", 0)
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
-		if m, err := re.MatchString(x); !m || err != nil {
+		if m, err := re.MatchString2(x); !m || err != nil {
 			b.Fatalf("no match or error! %v", err)
 		}
 	}
@@ -184,7 +184,7 @@ func BenchmarkOnePassLongPrefix(b *testing.B) {
 	re := MustCompile("^abcdefghijklmnopqrstuvwxyz.*$", 0)
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
-		if m, err := re.MatchString(x); !m || err != nil {
+		if m, err := re.MatchString2(x); !m || err != nil {
 			b.Fatalf("no match or error! %v", err)
 		}
 	}
@@ -196,7 +196,7 @@ func BenchmarkOnePassLongNotPrefix(b *testing.B) {
 	re := MustCompile("^.bcdefghijklmnopqrstuvwxyz.*$", 0)
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
-		if m, err := re.MatchString(x); !m || err != nil {
+		if m, err := re.MatchString2(x); !m || err != nil {
 			b.Fatalf("no match or error! %v", err)
 		}
 	}
@@ -274,13 +274,13 @@ func BenchmarkMatchHard_32M(b *testing.B)   { benchmark(b, hard, 32<<20) }
 func TestProgramTooLongForBacktrack(t *testing.T) {
 	longRegex := MustCompile(`(one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|twenty|twentyone|twentytwo|twentythree|twentyfour|twentyfive|twentysix|twentyseven|twentyeight|twentynine|thirty|thirtyone|thirtytwo|thirtythree|thirtyfour|thirtyfive|thirtysix|thirtyseven|thirtyeight|thirtynine|forty|fortyone|fortytwo|fortythree|fortyfour|fortyfive|fortysix|fortyseven|fortyeight|fortynine|fifty|fiftyone|fiftytwo|fiftythree|fiftyfour|fiftyfive|fiftysix|fiftyseven|fiftyeight|fiftynine|sixty|sixtyone|sixtytwo|sixtythree|sixtyfour|sixtyfive|sixtysix|sixtyseven|sixtyeight|sixtynine|seventy|seventyone|seventytwo|seventythree|seventyfour|seventyfive|seventysix|seventyseven|seventyeight|seventynine|eighty|eightyone|eightytwo|eightythree|eightyfour|eightyfive|eightysix|eightyseven|eightyeight|eightynine|ninety|ninetyone|ninetytwo|ninetythree|ninetyfour|ninetyfive|ninetysix|ninetyseven|ninetyeight|ninetynine|onehundred)`, 0)
 
-	if m, err := longRegex.MatchString("two"); !m {
-		t.Errorf("longRegex.MatchString(\"two\") was false, want true")
+	if m, err := longRegex.MatchString2("two"); !m {
+		t.Errorf("longRegex.MatchString2(\"two\") was false, want true")
 	} else if err != nil {
 		t.Errorf("Error: %v", err)
 	}
-	if m, err := longRegex.MatchString("xxx"); m {
-		t.Errorf("longRegex.MatchString(\"xxx\") was true, want false")
+	if m, err := longRegex.MatchString2("xxx"); m {
+		t.Errorf("longRegex.MatchString2(\"xxx\") was true, want false")
 	} else if err != nil {
 		t.Errorf("Error: %v", err)
 	}

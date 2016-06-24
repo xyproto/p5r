@@ -1,4 +1,4 @@
-package regexp2
+package p5r
 
 import (
 	"bytes"
@@ -10,7 +10,7 @@ import (
 	"time"
 	"unicode"
 
-	"github.com/dlclark/regexp2/syntax"
+	"github.com/xyproto/p5r/syntax"
 )
 
 type runner struct {

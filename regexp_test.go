@@ -1,11 +1,11 @@
-package regexp2
+package p5r
 
 import (
 	"reflect"
 	"testing"
 	"time"
 
-	"github.com/dlclark/regexp2/syntax"
+	"github.com/xyproto/p5r/syntax"
 )
 
 func TestBacktrack_CatastrophicTimeout(t *testing.T) {
@@ -378,7 +378,7 @@ func TestParseNegativeDigit(t *testing.T) {
 
 func TestRunNegativeDigit(t *testing.T) {
 	re := MustCompile(`\D`, 0)
-	m, err := re.MatchString("this is a test")
+	m, err := re.MatchString2("this is a test")
 	if err != nil {
 		t.Fatalf("Unexpected error: %v", err)
 	}
@@ -514,13 +514,13 @@ func TestUnicodeSupplementaryCharSetMatch(t *testing.T) {
 	//0x2070E 0x20731 𠜱 0x20779 𠝹
 	re := MustCompile("[𠜎-𠝹]", 0)
 
-	if m, err := re.MatchString("\u2070"); err != nil {
+	if m, err := re.MatchString2("\u2070"); err != nil {
 		t.Fatalf("Unexpected err: %v", err)
 	} else if m {
 		t.Fatalf("Unexpected match")
 	}
 
-	if m, err := re.MatchString("𠜱"); err != nil {
+	if m, err := re.MatchString2("𠜱"); err != nil {
 		t.Fatalf("Unexpected err: %v", err)
 	} else if !m {
 		t.Fatalf("Expected match")
@@ -531,13 +531,13 @@ func TestUnicodeSupplementaryCharInRange(t *testing.T) {
 	//0x2070E 0x20731 𠜱 0x20779 𠝹
 	re := MustCompile(".", 0)
 
-	if m, err := re.MatchString("\u2070"); err != nil {
+	if m, err := re.MatchString2("\u2070"); err != nil {
 		t.Fatalf("Unexpected err: %v", err)
 	} else if !m {
 		t.Fatalf("Expected match")
 	}
 
-	if m, err := re.MatchString("𠜱"); err != nil {
+	if m, err := re.MatchString2("𠜱"); err != nil {
 		t.Fatalf("Unexpected err: %v", err)
 	} else if !m {
 		t.Fatalf("Expected match")
@@ -546,56 +546,56 @@ func TestUnicodeSupplementaryCharInRange(t *testing.T) {
 
 func TestHexadecimalCurlyBraces(t *testing.T) {
 	re := MustCompile(`\x20`, 0)
-	if m, err := re.MatchString(" "); err != nil {
+	if m, err := re.MatchString2(" "); err != nil {
 		t.Fatalf("Unexpected err: %v", err)
 	} else if !m {
 		t.Fatalf("Expected match")
 	}
 
 	re = MustCompile(`\x{C4}`, 0)
-	if m, err := re.MatchString("Ä"); err != nil {
+	if m, err := re.MatchString2("Ä"); err != nil {
 		t.Fatalf("Unexpected err: %v", err)
 	} else if !m {
 		t.Fatalf("Expected match")
 	}
 
 	re = MustCompile(`\x{0C5}`, 0)
-	if m, err := re.MatchString("Å"); err != nil {
+	if m, err := re.MatchString2("Å"); err != nil {
 		t.Fatalf("Unexpected err: %v", err)
 	} else if !m {
 		t.Fatalf("Expected match")
 	}
 
 	re = MustCompile(`\x{00C6}`, 0)
-	if m, err := re.MatchString("Æ"); err != nil {
+	if m, err := re.MatchString2("Æ"); err != nil {
 		t.Fatalf("Unexpected err: %v", err)
 	} else if !m {
 		t.Fatalf("Expected match")
 	}
 
 	re = MustCompile(`\x{1FF}`, 0)
-	if m, err := re.MatchString("ǿ"); err != nil {
+	if m, err := re.MatchString2("ǿ"); err != nil {
 		t.Fatalf("Unexpected err: %v", err)
 	} else if !m {
 		t.Fatalf("Expected match")
 	}
 
 	re = MustCompile(`\x{02FF}`, 0)
-	if m, err := re.MatchString("˿"); err != nil {
+	if m, err := re.MatchString2("˿"); err != nil {
 		t.Fatalf("Unexpected err: %v", err)
 	} else if !m {
 		t.Fatalf("Expected match")
 	}
 
 	re = MustCompile(`\x{1392}`, 0)
-	if m, err := re.MatchString("᎒"); err != nil {
+	if m, err := re.MatchString2("᎒"); err != nil {
 		t.Fatalf("Unexpected err: %v", err)
 	} else if !m {
 		t.Fatalf("Expected match")
 	}
 
 	re = MustCompile(`\x{0010ffff}`, 0)
-	if m, err := re.MatchString(string(0x10ffff)); err != nil {
+	if m, err := re.MatchString2(string(0x10ffff)); err != nil {
 		t.Fatalf("Unexpected err: %v", err)
 	} else if !m {
 		t.Fatalf("Expected match")

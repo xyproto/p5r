@@ -1,10 +1,10 @@
-package regexp2
+package p5r
 
 import (
 	"bytes"
 	"errors"
 
-	"github.com/dlclark/regexp2/syntax"
+	"github.com/xyproto/p5r/syntax"
 )
 
 const (
