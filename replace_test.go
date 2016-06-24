@@ -3,7 +3,7 @@ package p5r
 import "testing"
 
 func TestReplace_Basic(t *testing.T) {
-	re := MustCompile(`test`, 0)
+	re := MustCompile2(`test`, 0)
 	str, err := re.Replace("this is a test", "unit", -1, -1)
 	if err != nil {
 		t.Fatalf("Unexpected err: %v", err)
@@ -14,7 +14,7 @@ func TestReplace_Basic(t *testing.T) {
 }
 
 func TestReplace_NamedGroup(t *testing.T) {
-	re := MustCompile(`[^ ]+\s(?<time>)`, 0)
+	re := MustCompile2(`[^ ]+\s(?<time>)`, 0)
 	str, err := re.Replace("08/10/99 16:00", "${time}", -1, -1)
 	if err != nil {
 		t.Fatalf("Unexpected err: %v", err)
@@ -25,7 +25,7 @@ func TestReplace_NamedGroup(t *testing.T) {
 }
 
 func TestReplace_IgnoreCaseUpper(t *testing.T) {
-	re := MustCompile(`dog`, IgnoreCase)
+	re := MustCompile2(`dog`, IgnoreCase)
 	str, err := re.Replace("my dog has fleas", "CAT", -1, -1)
 	if err != nil {
 		t.Fatalf("Unexpected err: %v", err)
@@ -36,7 +36,7 @@ func TestReplace_IgnoreCaseUpper(t *testing.T) {
 }
 
 func TestReplace_IgnoreCaseLower(t *testing.T) {
-	re := MustCompile(`olang`, IgnoreCase)
+	re := MustCompile2(`olang`, IgnoreCase)
 	str, err := re.Replace("GoLAnG", "olang", -1, -1)
 	if err != nil {
 		t.Fatalf("Unexpected err: %v", err)
@@ -47,7 +47,7 @@ func TestReplace_IgnoreCaseLower(t *testing.T) {
 }
 
 func TestReplace_NumberGroup(t *testing.T) {
-	re := MustCompile(`D\.(.+)`, None)
+	re := MustCompile2(`D\.(.+)`, None)
 	str, err := re.Replace("D.Bau", "David $1", -1, -1)
 	if err != nil {
 		t.Fatalf("Unexpected err: %v", err)
@@ -58,7 +58,7 @@ func TestReplace_NumberGroup(t *testing.T) {
 }
 
 func TestReplace_LimitCount(t *testing.T) {
-	re := MustCompile(`a`, None)
+	re := MustCompile2(`a`, None)
 	str, err := re.Replace("aaaaa", "b", 0, 2)
 	if err != nil {
 		t.Fatalf("Unexpected err: %v", err)
@@ -69,7 +69,7 @@ func TestReplace_LimitCount(t *testing.T) {
 }
 
 func TestReplace_LimitCountSlice(t *testing.T) {
-	re := MustCompile(`a`, None)
+	re := MustCompile2(`a`, None)
 	myStr := "aaaaa"
 	str, err := re.Replace(myStr, "b", 3, 2)
 	if err != nil {
@@ -81,7 +81,7 @@ func TestReplace_LimitCountSlice(t *testing.T) {
 }
 
 func TestReplace_BeginBeforeAfterEnd(t *testing.T) {
-	re := MustCompile(`a`, None)
+	re := MustCompile2(`a`, None)
 	myStr := "a test a blah and a"
 	str, err := re.Replace(myStr, "stuff", -1, -1)
 	if err != nil {
@@ -93,7 +93,7 @@ func TestReplace_BeginBeforeAfterEnd(t *testing.T) {
 }
 
 func TestReplace_BadSyntax(t *testing.T) {
-	re := MustCompile(`a`, None)
+	re := MustCompile2(`a`, None)
 	myStr := "this is a test"
 	_, err := re.Replace(myStr, `$5000000000`, -1, -1)
 	if err == nil {

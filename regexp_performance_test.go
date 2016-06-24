@@ -8,7 +8,7 @@ import (
 func BenchmarkLiteral(b *testing.B) {
 	x := strings.Repeat("x", 50) + "y"
 	b.StopTimer()
-	re := MustCompile("y", 0)
+	re := MustCompile2("y", 0)
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
 		if m, err := re.MatchString2(x); !m || err != nil {
@@ -20,7 +20,7 @@ func BenchmarkLiteral(b *testing.B) {
 func BenchmarkNotLiteral(b *testing.B) {
 	x := strings.Repeat("x", 50) + "y"
 	b.StopTimer()
-	re := MustCompile(".y", 0)
+	re := MustCompile2(".y", 0)
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
 		if m, err := re.MatchString2(x); !m || err != nil {
@@ -32,7 +32,7 @@ func BenchmarkNotLiteral(b *testing.B) {
 func BenchmarkMatchClass(b *testing.B) {
 	b.StopTimer()
 	x := strings.Repeat("xxxx", 20) + "w"
-	re := MustCompile("[abcdw]", 0)
+	re := MustCompile2("[abcdw]", 0)
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
 		if m, err := re.MatchString2(x); !m || err != nil {
@@ -47,7 +47,7 @@ func BenchmarkMatchClass_InRange(b *testing.B) {
 	// 'b' is between 'a' and 'c', so the charclass
 	// range checking is no help here.
 	x := strings.Repeat("bbbb", 20) + "c"
-	re := MustCompile("[ac]", 0)
+	re := MustCompile2("[ac]", 0)
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
 		if m, err := re.MatchString2(x); !m || err != nil {
@@ -60,7 +60,7 @@ func BenchmarkMatchClass_InRange(b *testing.B) {
 func BenchmarkReplaceAll(b *testing.B) {
 	x := "abcdefghijklmnopqrstuvwxyz"
 	b.StopTimer()
-	re := MustCompile("[cjrw]", 0)
+	re := MustCompile2("[cjrw]", 0)
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
 		re.ReplaceAllString(x, "")
@@ -70,7 +70,7 @@ func BenchmarkReplaceAll(b *testing.B) {
 func BenchmarkAnchoredLiteralShortNonMatch(b *testing.B) {
 	b.StopTimer()
 	x := "abcdefghijklmnopqrstuvwxyz"
-	re := MustCompile("^zbc(d|e)", 0)
+	re := MustCompile2("^zbc(d|e)", 0)
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
 		if m, err := re.MatchString2(x); m || err != nil {
@@ -90,7 +90,7 @@ func BenchmarkAnchoredLiteralLongNonMatch(b *testing.B) {
 		}
 	}
 
-	re := MustCompile("^zbc(d|e)", 0)
+	re := MustCompile2("^zbc(d|e)", 0)
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
 		if m, err := re.MatchRunes(x); m || err != nil {
@@ -102,7 +102,7 @@ func BenchmarkAnchoredLiteralLongNonMatch(b *testing.B) {
 func BenchmarkAnchoredShortMatch(b *testing.B) {
 	b.StopTimer()
 	x := "abcdefghijklmnopqrstuvwxyz"
-	re := MustCompile("^.bc(d|e)", 0)
+	re := MustCompile2("^.bc(d|e)", 0)
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
 		if m, err := re.MatchString2(x); !m || err != nil {
@@ -121,7 +121,7 @@ func BenchmarkAnchoredLongMatch(b *testing.B) {
 		}
 	}
 
-	re := MustCompile("^.bc(d|e)", 0)
+	re := MustCompile2("^.bc(d|e)", 0)
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
 		if m, err := re.MatchRunes(x); !m || err != nil {
@@ -133,7 +133,7 @@ func BenchmarkAnchoredLongMatch(b *testing.B) {
 func BenchmarkOnePassShortA(b *testing.B) {
 	b.StopTimer()
 	x := "abcddddddeeeededd"
-	re := MustCompile("^.bc(d|e)*$", 0)
+	re := MustCompile2("^.bc(d|e)*$", 0)
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
 		if m, err := re.MatchString2(x); !m || err != nil {
@@ -145,7 +145,7 @@ func BenchmarkOnePassShortA(b *testing.B) {
 func BenchmarkNotOnePassShortA(b *testing.B) {
 	b.StopTimer()
 	x := "abcddddddeeeededd"
-	re := MustCompile(".bc(d|e)*$", 0)
+	re := MustCompile2(".bc(d|e)*$", 0)
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
 		if m, err := re.MatchString2(x); !m || err != nil {
@@ -157,7 +157,7 @@ func BenchmarkNotOnePassShortA(b *testing.B) {
 func BenchmarkOnePassShortB(b *testing.B) {
 	b.StopTimer()
 	x := "abcddddddeeeededd"
-	re := MustCompile("^.bc(?:d|e)*$", 0)
+	re := MustCompile2("^.bc(?:d|e)*$", 0)
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
 		if m, err := re.MatchString2(x); !m || err != nil {
@@ -169,7 +169,7 @@ func BenchmarkOnePassShortB(b *testing.B) {
 func BenchmarkNotOnePassShortB(b *testing.B) {
 	b.StopTimer()
 	x := "abcddddddeeeededd"
-	re := MustCompile(".bc(?:d|e)*$", 0)
+	re := MustCompile2(".bc(?:d|e)*$", 0)
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
 		if m, err := re.MatchString2(x); !m || err != nil {
@@ -181,7 +181,7 @@ func BenchmarkNotOnePassShortB(b *testing.B) {
 func BenchmarkOnePassLongPrefix(b *testing.B) {
 	b.StopTimer()
 	x := "abcdefghijklmnopqrstuvwxyz"
-	re := MustCompile("^abcdefghijklmnopqrstuvwxyz.*$", 0)
+	re := MustCompile2("^abcdefghijklmnopqrstuvwxyz.*$", 0)
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
 		if m, err := re.MatchString2(x); !m || err != nil {
@@ -193,7 +193,7 @@ func BenchmarkOnePassLongPrefix(b *testing.B) {
 func BenchmarkOnePassLongNotPrefix(b *testing.B) {
 	b.StopTimer()
 	x := "abcdefghijklmnopqrstuvwxyz"
-	re := MustCompile("^.bcdefghijklmnopqrstuvwxyz.*$", 0)
+	re := MustCompile2("^.bcdefghijklmnopqrstuvwxyz.*$", 0)
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
 		if m, err := re.MatchString2(x); !m || err != nil {
@@ -226,7 +226,7 @@ func makeText(n int) []rune {
 }
 
 func benchmark(b *testing.B, re string, n int) {
-	r := MustCompile(re, 0)
+	r := MustCompile2(re, 0)
 	t := makeText(n)
 	b.ResetTimer()
 	b.SetBytes(int64(n))
@@ -272,7 +272,7 @@ func BenchmarkMatchHard_32M(b *testing.B)   { benchmark(b, hard, 32<<20) }
 // TestProgramTooLongForBacktrack tests that a regex which is too long
 // for the backtracker still executes properly.
 func TestProgramTooLongForBacktrack(t *testing.T) {
-	longRegex := MustCompile(`(one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|twenty|twentyone|twentytwo|twentythree|twentyfour|twentyfive|twentysix|twentyseven|twentyeight|twentynine|thirty|thirtyone|thirtytwo|thirtythree|thirtyfour|thirtyfive|thirtysix|thirtyseven|thirtyeight|thirtynine|forty|fortyone|fortytwo|fortythree|fortyfour|fortyfive|fortysix|fortyseven|fortyeight|fortynine|fifty|fiftyone|fiftytwo|fiftythree|fiftyfour|fiftyfive|fiftysix|fiftyseven|fiftyeight|fiftynine|sixty|sixtyone|sixtytwo|sixtythree|sixtyfour|sixtyfive|sixtysix|sixtyseven|sixtyeight|sixtynine|seventy|seventyone|seventytwo|seventythree|seventyfour|seventyfive|seventysix|seventyseven|seventyeight|seventynine|eighty|eightyone|eightytwo|eightythree|eightyfour|eightyfive|eightysix|eightyseven|eightyeight|eightynine|ninety|ninetyone|ninetytwo|ninetythree|ninetyfour|ninetyfive|ninetysix|ninetyseven|ninetyeight|ninetynine|onehundred)`, 0)
+	longRegex := MustCompile2(`(one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|twenty|twentyone|twentytwo|twentythree|twentyfour|twentyfive|twentysix|twentyseven|twentyeight|twentynine|thirty|thirtyone|thirtytwo|thirtythree|thirtyfour|thirtyfive|thirtysix|thirtyseven|thirtyeight|thirtynine|forty|fortyone|fortytwo|fortythree|fortyfour|fortyfive|fortysix|fortyseven|fortyeight|fortynine|fifty|fiftyone|fiftytwo|fiftythree|fiftyfour|fiftyfive|fiftysix|fiftyseven|fiftyeight|fiftynine|sixty|sixtyone|sixtytwo|sixtythree|sixtyfour|sixtyfive|sixtysix|sixtyseven|sixtyeight|sixtynine|seventy|seventyone|seventytwo|seventythree|seventyfour|seventyfive|seventysix|seventyseven|seventyeight|seventynine|eighty|eightyone|eightytwo|eightythree|eightyfour|eightyfive|eightysix|eightyseven|eightyeight|eightynine|ninety|ninetyone|ninetytwo|ninetythree|ninetyfour|ninetyfive|ninetysix|ninetyseven|ninetyeight|ninetynine|onehundred)`, 0)
 
 	if m, err := longRegex.MatchString2("two"); !m {
 		t.Errorf("longRegex.MatchString2(\"two\") was false, want true")
@@ -288,7 +288,7 @@ func TestProgramTooLongForBacktrack(t *testing.T) {
 
 func BenchmarkLeading(b *testing.B) {
 	b.StopTimer()
-	r := MustCompile("[a-q][^u-z]{13}x", 0)
+	r := MustCompile2("[a-q][^u-z]{13}x", 0)
 	inp := makeText(1000000)
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {

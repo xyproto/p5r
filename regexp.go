@@ -71,10 +71,10 @@ func Compile(expr string, opt RegexOptions) (*Regexp, error) {
 	}, nil
 }
 
-// MustCompile is like Compile but panics if the expression cannot be parsed.
+// MustCompile2 is like Compile but panics if the expression cannot be parsed.
 // It simplifies safe initialization of global variables holding compiled regular
 // expressions.
-func MustCompile(str string, opt RegexOptions) *Regexp {
+func MustCompile2(str string, opt RegexOptions) *Regexp {
 	regexp, error := Compile(str, opt)
 	if error != nil {
 		panic(`regexp2: Compile(` + quote(str) + `): ` + error.Error())

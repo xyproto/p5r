@@ -3,7 +3,7 @@ package p5r
 import "testing"
 
 func TestRightToLeft_Basic(t *testing.T) {
-	re := MustCompile(`foo\d+`, RightToLeft)
+	re := MustCompile2(`foo\d+`, RightToLeft)
 	s := "0123456789foo4567890foo1foo  0987"
 
 	m, err := re.FindStringMatch(s)
@@ -24,7 +24,7 @@ func TestRightToLeft_Basic(t *testing.T) {
 }
 
 func TestRightToLeft_StartAt(t *testing.T) {
-	re := MustCompile(`\d`, RightToLeft)
+	re := MustCompile2(`\d`, RightToLeft)
 
 	m, err := re.FindStringMatchStartingAt("0123", -1)
 	if err != nil {
@@ -40,7 +40,7 @@ func TestRightToLeft_StartAt(t *testing.T) {
 }
 
 func TestRightToLeft_Replace(t *testing.T) {
-	re := MustCompile(`\d`, RightToLeft)
+	re := MustCompile2(`\d`, RightToLeft)
 	s := "0123456789foo4567890foo         "
 	str, err := re.Replace(s, "#", -1, 7)
 	if err != nil {

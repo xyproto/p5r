@@ -21,3 +21,7 @@ func (re *Regexp) ReplaceAllString(input, replacement string) string {
 	// Return the string with replacements
 	return output
 }
+
+func MustCompile(input string) *Regexp {
+	return MustCompile2(input, 0)
+}
