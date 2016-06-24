@@ -47,3 +47,7 @@ func (re *Regexp) Convert() (*goregexp.Regexp, error) {
 func (re *Regexp) MustConvert() *goregexp.Regexp {
 	return goregexp.MustCompile(re.pattern)
 }
+
+func QuoteMeta(s string) string {
+	return goregexp.QuoteMeta(s)
+}
