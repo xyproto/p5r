@@ -9,3 +9,15 @@ func (re *Regexp) MatchString(s string) bool {
 	}
 	return m != nil
 }
+
+// ReplaceAllString returns a modified string if the replacement worked
+// Returns the original string if an error occured
+func (re *Regexp) ReplaceAllString(input, replacement string) string {
+	output, err := re.Replace(input, replacement, -1, -1)
+	if err != nil {
+		// Return the original string if something went wrong
+		return input
+	}
+	// Return the string with replacements
+	return output
+}
