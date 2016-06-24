@@ -1,5 +1,7 @@
 package p5r
 
+// Compatability functions for the "regexp" package
+
 // MatchString return true if the string matches the regex
 // Returns false if an error/timeout occurs
 func (re *Regexp) MatchString(s string) bool {
@@ -24,4 +26,8 @@ func (re *Regexp) ReplaceAllString(input, replacement string) string {
 
 func MustCompile(input string) *Regexp {
 	return MustCompile2(input, 0)
+}
+
+func Compile(input string) (*Regexp, error) {
+	return Compile2(input, 0)
 }
