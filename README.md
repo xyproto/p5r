@@ -1,6 +1,6 @@
-# P5R
-
 <img src="https://raw.github.com/xyproto/p5r/master/logo.png" style="margin-left: 2em">
+
+# P5R
 
 This is a fork of [regexp2](https://github.com/dlclark/regexp2).
 
