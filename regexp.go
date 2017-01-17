@@ -393,6 +393,50 @@ func (regex *Regexp) ReplaceAllStringFunc(src string, repl func(string) string) 
 	return buf.String()
 }
 
+// FindAllStringSubmatch is the 'All' version of FindStringSubmatch; it
+// returns a slice of all successive matches of the expression, as defined by
+// the 'All' description in the package comment.
+// A return value of nil indicates no match.
+func (regex *Regexp) FindAllStringSubmatch(s string, n int) [][]string {
+	indices := regex.FindAllStringSubmatchIndex(s, n)
+	if indices == nil {
+		return nil
+	}
+	var result [][]string = make([][]string, len(indices))
+	for i := range indices {
+		result[i] = make([]string, len(indices[i]) / 2)
+		for j := 0; j < len(result[i]); j++ {
+			idx := 2 * j
+			if indices[i][idx] == -1 || indices[i][idx + 1] == -1 {
+				continue
+			}
+			result[i][j] = s[indices[i][idx]:indices[i][idx + 1]]
+		}
+	}
+	return result
+}
+
+// FindStringSubmatch returns a slice of strings holding the text of the
+// leftmost match of the regular expression in s and the matches, if any, of
+// its subexpressions, as defined by the 'Submatch' description in the
+// package comment.
+// A return value of nil indicates no match.
+func (regex *Regexp) FindStringSubmatch(s string) []string {
+	indices := regex.FindStringSubmatchIndex(s)
+	if indices == nil {
+		return nil
+	}
+	var result []string = make([]string, len(indices) / 2)
+	for i := 0; i < len(result); i++ {
+		idx := 2 * i
+		if indices[idx] == -1 || indices[idx + 1] == -1 {
+			continue
+		}
+		result[i] = s[indices[idx]:indices[idx + 1]]
+	}
+	return result
+}
+
 // FindAllStringIndex is the 'All' version of FindStringIndex; it returns a
 // slice of all successive matches of the expression, as defined by the 'All'
 // description in the package comment.
@@ -504,4 +548,9 @@ func (regex *Regexp) FindStringSubmatchIndex(s string) []int {
 		}
 	}
 	return result
+}
+
+// Match reports whether the Regexp matches the byte slice b.
+func (regex *Regexp) Match(b []byte) bool {
+	return regex.MatchString(string(b))
 }

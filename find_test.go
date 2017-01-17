@@ -151,6 +151,42 @@ func TestFindStringIndex(t *testing.T) {
 	}
 }
 
+func TestFindAllStringSubmatch(t *testing.T) {
+	for _, test := range findTests {
+		result := MustCompile(test.pat).FindAllStringSubmatch(test.text, -1)
+		switch {
+		case test.matches == nil && result == nil:
+		// ok
+		case test.matches == nil && result != nil:
+			t.Errorf("expected no match; got one: %s", test)
+		case test.matches != nil && result == nil:
+			t.Errorf("expected match; got none: %s", test)
+		case len(test.matches) != len(result):
+			t.Errorf("expected %d matches; got %d: %s", len(test.matches), len(result), test)
+		case test.matches != nil && result != nil:
+			for k, match := range test.matches {
+				testSubmatchString(&test, k, match, result[k], t)
+			}
+		}
+	}
+}
+
+func TestFindStringSubmatch(t *testing.T) {
+	for _, test := range findTests {
+		result := MustCompile(test.pat).FindStringSubmatch(test.text)
+		switch {
+		case test.matches == nil && result == nil:
+		// ok
+		case test.matches == nil && result != nil:
+			t.Errorf("expected no match; got one: %s", test)
+		case test.matches != nil && result == nil:
+			t.Errorf("expected match; got none: %s", test)
+		case test.matches != nil && result != nil:
+			testSubmatchString(&test, 0, test.matches[0], result, t)
+		}
+	}
+}
+
 // build is a helper to construct a [][]int by extracting n sequences from x.
 // This represents n matches with len(x)/n submatches each.
 func build(n int, x ...int) [][]int {
@@ -243,6 +279,26 @@ func testFindIndex(test *FindTest, result []int, t *testing.T) {
 		expect := test.matches[0]
 		if expect[0] != result[0] || expect[1] != result[1] {
 			t.Errorf("expected %v got %v: %s", expect, result, test)
+		}
+	}
+}
+
+func testSubmatchString(test *FindTest, n int, submatches []int, result []string, t *testing.T) {
+	if len(submatches) != len(result)*2 {
+		t.Errorf("match %d: expected %d submatches; got %d: %s", n, len(submatches)/2, len(result), test)
+		return
+	}
+	for k := 0; k < len(submatches); k += 2 {
+		if submatches[k] == -1 {
+			if result[k/2] != "" {
+				t.Errorf("match %d: expected nil got %q: %s", n, result, test)
+			}
+			continue
+		}
+		expect := test.text[submatches[k]:submatches[k+1]]
+		if expect != result[k/2] {
+			t.Errorf("match %d: expected %q got %q: %s", n, expect, result, test)
+			return
 		}
 	}
 }
