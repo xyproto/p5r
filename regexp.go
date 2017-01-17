@@ -16,6 +16,7 @@ import (
 	"time"
 
 	"github.com/xyproto/p5r/syntax"
+	"bytes"
 )
 
 // Default timeout used when running regexp matches -- "forever"
@@ -345,4 +346,211 @@ func (re *Regexp) GroupNumberFromName(name string) int {
 	}
 
 	return -1
+}
+
+// ReplaceAllFunc returns a copy of src in which all matches of the
+// Regexp have been replaced by the return value of function repl applied
+// to the matched byte slice. The replacement returned by repl is substituted
+// directly, without using Expand.
+func (regex *Regexp) ReplaceAllFunc(src []byte, repl func([]byte) []byte) []byte {
+	return []byte(regex.ReplaceAllStringFunc(string(src), func(s string) string {
+		return string(repl([]byte(s)))
+	}))
+}
+
+// ReplaceAllStringFunc returns a copy of src in which all matches of the
+// Regexp have been replaced by the return value of function repl applied
+// to the matched substring. The replacement returned by repl is substituted
+// directly, without using Expand.
+func (regex *Regexp) ReplaceAllStringFunc(src string, repl func(string) string) string {
+	match, err := regex.FindStringMatchStartingAt(src, -1)
+
+	if err != nil {
+		return ""
+	}
+	if match == nil {
+		return src
+	}
+	buf := &bytes.Buffer{}
+	text := match.text
+	prevat := 0
+
+	for match != nil {
+		if match.Index != prevat {
+			buf.WriteString(string(text[prevat:match.Index]))
+		}
+		prevat = match.Index + match.Length
+		buf.WriteString(repl(src[match.Index:prevat]))
+		match, err = regex.FindNextMatch(match)
+		if err != nil {
+			return ""
+		}
+	}
+
+	if prevat < len(text) {
+		buf.WriteString(string(text[prevat:]))
+	}
+	return buf.String()
+}
+
+// FindAllStringSubmatch is the 'All' version of FindStringSubmatch; it
+// returns a slice of all successive matches of the expression, as defined by
+// the 'All' description in the package comment.
+// A return value of nil indicates no match.
+func (regex *Regexp) FindAllStringSubmatch(source string, n int) [][]string {
+	indices := regex.FindAllStringSubmatchIndex(source, n)
+	if indices == nil {
+		return nil
+	}
+	var result [][]string = make([][]string, len(indices))
+	for i := range indices {
+		result[i] = make([]string, len(indices[i]) / 2)
+		for j := 0; j < len(result[i]); j++ {
+			idx := 2 * j
+			if indices[i][idx] == -1 || indices[i][idx + 1] == -1 {
+				continue
+			}
+			result[i][j] = source[indices[i][idx]:indices[i][idx + 1]]
+		}
+	}
+	return result
+}
+
+// FindStringSubmatch returns a slice of strings holding the text of the
+// leftmost match of the regular expression in s and the matches, if any, of
+// its subexpressions, as defined by the 'Submatch' description in the
+// package comment.
+// A return value of nil indicates no match.
+func (regex *Regexp) FindStringSubmatch(source string) []string {
+	indices := regex.FindStringSubmatchIndex(source)
+	if indices == nil {
+		return nil
+	}
+	var result []string = make([]string, len(indices) / 2)
+	for i := 0; i < len(result); i++ {
+		idx := 2 * i
+		if indices[idx] == -1 || indices[idx + 1] == -1 {
+			continue
+		}
+		result[i] = source[indices[idx]:indices[idx + 1]]
+	}
+	return result
+}
+
+// FindAllStringIndex is the 'All' version of FindStringIndex; it returns a
+// slice of all successive matches of the expression, as defined by the 'All'
+// description in the package comment.
+// Checks up to n characters or all if n is negative.
+// A return value of nil indicates no match.
+func (regex *Regexp) FindAllStringIndex(source string, n int) [][]int {
+	if n < 0 {
+		n = len(source) + 1
+	}
+	match, err  := regex.FindStringMatch(source)
+	if err != nil {
+		return nil
+	}
+	var result [][]int
+	for match != nil && match.Index < n {
+		indices := make([]int, 2)
+		indices[0] = match.Index
+		indices[1] = match.Index + match.Length
+		result = append(result, indices)
+		if indices[1] >= len(source) {
+			break
+		}
+		match, err = regex.FindNextMatch(match)
+		if err != nil {
+			return nil
+		}
+	}
+	return result
+}
+
+// FindStringIndex returns a two-element slice of integers defining the
+// location of the leftmost match in s of the regular expression. The match
+// itself is at s[loc[0]:loc[1]].
+// A return value of nil indicates no match.
+func (regex *Regexp) FindStringIndex(source string) []int {
+	match, err  := regex.FindStringMatch(source)
+	if err != nil || match == nil {
+		return nil
+	}
+	result := make([]int, 2)
+	result[0] = match.Index
+	result[1] = match.Index + match.Length
+	return result
+}
+
+// FindAllSubmatchIndex is the 'All' version of FindSubmatchIndex; it returns
+// a slice of all successive matches of the expression, as defined by the
+// 'All' description in the package comment.
+// A return value of nil indicates no match.
+func (regex *Regexp) FindAllSubmatchIndex(b []byte, n int) [][]int {
+	return regex.FindAllStringSubmatchIndex(string(b), n)
+}
+
+// FindAllStringSubmatchIndex is the 'All' version of
+// FindStringSubmatchIndex; it returns a slice of all successive matches of
+// the expression, as defined by the 'All' description in the package
+// comment.
+// A return value of nil indicates no match.
+func (regex *Regexp) FindAllStringSubmatchIndex(source string, n int) [][]int {
+	if n < 0 {
+		n = len(source) + 1
+	}
+	m, err  := regex.FindStringMatch(source)
+	if err != nil || m == nil {
+		return nil
+	}
+	var result [][]int
+	for m != nil && m.Index < n {
+		indices := getIndicesFromGroup(m)
+		result = append(result, indices)
+		if indices[1] >= len(source) {
+			break
+		}
+		m, _ = regex.FindNextMatch(m)
+	}
+	return result
+}
+
+func getIndicesFromGroup(match *Match) []int {
+	var indices []int
+	for _, group := range match.Groups() {
+		if len(group.Captures) > 0 {
+			capture := group.Captures[len(group.Captures) - 1]
+			indices = append(indices, capture.Index, capture.Index + capture.Length)
+		} else {
+			indices = append(indices, -1, -1)
+		}
+	}
+	return indices
+}
+
+// FindStringSubmatchIndex returns a slice holding the index pairs
+// identifying the leftmost match of the regular expression in s and the
+// matches, if any, of its subexpressions, as defined by the 'Submatch' and
+// 'Index' descriptions in the package comment.
+// A return value of nil indicates no match.
+func (regex *Regexp) FindStringSubmatchIndex(source string) []int {
+	match, err  := regex.FindStringMatch(source)
+	if err != nil || match == nil {
+		return nil
+	}
+	var result []int
+	for _, group := range match.Groups() {
+		if len(group.Captures) > 0 {
+			lastCapture := group.Captures[len(group.Captures) - 1]
+			result = append(result, lastCapture.Index, lastCapture.Index + lastCapture.Length)
+		} else {
+			result = append(result, -1, -1)
+		}
+	}
+	return result
+}
+
+// Match reports whether the Regexp matches the byte slice b.
+func (regex *Regexp) Match(b []byte) bool {
+	return regex.MatchString(string(b))
 }

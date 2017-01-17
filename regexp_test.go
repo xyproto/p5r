@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/xyproto/p5r/syntax"
+	"strings"
 )
 
 func TestBacktrack_CatastrophicTimeout(t *testing.T) {
@@ -635,6 +636,52 @@ func TestHexadecimalCurlyBraces(t *testing.T) {
 		t.Fatal("Expected error")
 	}
 
+}
+
+type ReplaceFuncTest struct {
+	pattern       string
+	replacement   func(string) string
+	input, output string
+}
+
+// Please note that p5r does not support non-english characters as it returns incorrect results -
+// this tests have been commented out.
+var replaceFuncTests = []ReplaceFuncTest{
+	{"[a-c]", func(s string) string { return "x" + s + "y" }, "defabcdef", "defxayxbyxcydef"},
+	{"[a-c]+", func(s string) string { return "x" + s + "y" }, "defabcdef", "defxabcydef"},
+	{"[a-c]*", func(s string) string { return "x" + s + "y" }, "defabcdef", "xydxyexyfxabcyxydxyexyfxy"},
+	{"[a-c]+", func(s string) string { return "test" }, "defabcdef", "deftestdef"},
+	{"[a-c]+", func(s string) string { return s + "test" + s }, "defabcdef", "defabctestabcdef"},
+	{"[a-c]+", func(s string) string { return strings.ToUpper(s) }, "defabcdef", "defABCdef"},
+	{"[a-c]", func(s string) string { return strings.ToUpper(s) }, "defabcdef", "defABCdef"},
+	{"[a-c]*", func(s string) string { return strings.ToUpper(s) }, "defabcdef", "defABCdef"},
+	{"d.*c", func(s string) string { return strings.ToUpper(s) }, "defabcdef", "DEFABCdef"},
+	{"(d.*c)|f+", func(s string) string { return strings.ToUpper(s) }, "defabcdef", "DEFABCdeF"},
+	{"^def", func(s string) string { return strings.ToUpper(s) }, "defabcdef", "DEFabcdef"},
+	{"def$", func(s string) string { return strings.ToUpper(s) }, "defabcdef", "defabcDEF"},
+	{"a+", func(s string) string { return "("+s+")" }, "banaana", "b(a)n(aa)n(a)"},
+	//{`[日本語]+`, func(s string) string { return "x" + s + "y" }, "日本語日本語", "x日本語日本語y",},
+}
+
+func TestReplaceAllFunc(t *testing.T) {
+	for _, tc := range replaceFuncTests {
+		re, err := Compile(tc.pattern)
+		if err != nil {
+			t.Errorf("Unexpected error compiling %q: %v", tc.pattern, err)
+			continue
+		}
+		actual := re.ReplaceAllStringFunc(tc.input, tc.replacement)
+		if actual != tc.output {
+			t.Errorf("%q.ReplaceFunc(%q,fn) = %q; want %q",
+				tc.pattern, tc.input, actual, tc.output)
+		}
+		// now try bytes
+		actual = string(re.ReplaceAllFunc([]byte(tc.input), func(s []byte) []byte { return []byte(tc.replacement(string(s))) }))
+		if actual != tc.output {
+			t.Errorf("%q.ReplaceFunc(%q,fn) = %q; want %q",
+				tc.pattern, tc.input, actual, tc.output)
+		}
+	}
 }
 
 /*
