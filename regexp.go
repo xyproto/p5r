@@ -363,25 +363,25 @@ func (regex *Regexp) ReplaceAllFunc(src []byte, repl func([]byte) []byte) []byte
 // to the matched substring. The replacement returned by repl is substituted
 // directly, without using Expand.
 func (regex *Regexp) ReplaceAllStringFunc(src string, repl func(string) string) string {
-	m, err := regex.FindStringMatchStartingAt(src, -1)
+	match, err := regex.FindStringMatchStartingAt(src, -1)
 
 	if err != nil {
 		return ""
 	}
-	if m == nil {
+	if match == nil {
 		return src
 	}
 	buf := &bytes.Buffer{}
-	text := m.text
+	text := match.text
 	prevat := 0
 
-	for m != nil {
-		if m.Index != prevat {
-			buf.WriteString(string(text[prevat:m.Index]))
+	for match != nil {
+		if match.Index != prevat {
+			buf.WriteString(string(text[prevat:match.Index]))
 		}
-		prevat = m.Index + m.Length
-		buf.WriteString(repl(src[m.Index:prevat]))
-		m, err = regex.FindNextMatch(m)
+		prevat = match.Index + match.Length
+		buf.WriteString(repl(src[match.Index:prevat]))
+		match, err = regex.FindNextMatch(match)
 		if err != nil {
 			return ""
 		}
@@ -397,8 +397,8 @@ func (regex *Regexp) ReplaceAllStringFunc(src string, repl func(string) string) 
 // returns a slice of all successive matches of the expression, as defined by
 // the 'All' description in the package comment.
 // A return value of nil indicates no match.
-func (regex *Regexp) FindAllStringSubmatch(s string, n int) [][]string {
-	indices := regex.FindAllStringSubmatchIndex(s, n)
+func (regex *Regexp) FindAllStringSubmatch(source string, n int) [][]string {
+	indices := regex.FindAllStringSubmatchIndex(source, n)
 	if indices == nil {
 		return nil
 	}
@@ -410,7 +410,7 @@ func (regex *Regexp) FindAllStringSubmatch(s string, n int) [][]string {
 			if indices[i][idx] == -1 || indices[i][idx + 1] == -1 {
 				continue
 			}
-			result[i][j] = s[indices[i][idx]:indices[i][idx + 1]]
+			result[i][j] = source[indices[i][idx]:indices[i][idx + 1]]
 		}
 	}
 	return result
@@ -421,8 +421,8 @@ func (regex *Regexp) FindAllStringSubmatch(s string, n int) [][]string {
 // its subexpressions, as defined by the 'Submatch' description in the
 // package comment.
 // A return value of nil indicates no match.
-func (regex *Regexp) FindStringSubmatch(s string) []string {
-	indices := regex.FindStringSubmatchIndex(s)
+func (regex *Regexp) FindStringSubmatch(source string) []string {
+	indices := regex.FindStringSubmatchIndex(source)
 	if indices == nil {
 		return nil
 	}
@@ -432,7 +432,7 @@ func (regex *Regexp) FindStringSubmatch(s string) []string {
 		if indices[idx] == -1 || indices[idx + 1] == -1 {
 			continue
 		}
-		result[i] = s[indices[idx]:indices[idx + 1]]
+		result[i] = source[indices[idx]:indices[idx + 1]]
 	}
 	return result
 }
@@ -442,24 +442,24 @@ func (regex *Regexp) FindStringSubmatch(s string) []string {
 // description in the package comment.
 // Checks up to n characters or all if n is negative.
 // A return value of nil indicates no match.
-func (regex *Regexp) FindAllStringIndex(s string, n int) [][]int {
+func (regex *Regexp) FindAllStringIndex(source string, n int) [][]int {
 	if n < 0 {
-		n = len(s) + 1
+		n = len(source) + 1
 	}
-	m, err  := regex.FindStringMatch(s)
+	match, err  := regex.FindStringMatch(source)
 	if err != nil {
 		return nil
 	}
 	var result [][]int
-	for m != nil && m.Index < n {
+	for match != nil && match.Index < n {
 		indices := make([]int, 2)
-		indices[0] = m.Index
-		indices[1] = m.Index + m.Length
+		indices[0] = match.Index
+		indices[1] = match.Index + match.Length
 		result = append(result, indices)
-		if indices[1] >= len(s) {
+		if indices[1] >= len(source) {
 			break
 		}
-		m, err = regex.FindNextMatch(m)
+		match, err = regex.FindNextMatch(match)
 		if err != nil {
 			return nil
 		}
@@ -471,14 +471,14 @@ func (regex *Regexp) FindAllStringIndex(s string, n int) [][]int {
 // location of the leftmost match in s of the regular expression. The match
 // itself is at s[loc[0]:loc[1]].
 // A return value of nil indicates no match.
-func (regex *Regexp) FindStringIndex(s string) []int {
-	m, err  := regex.FindStringMatch(s)
-	if err != nil || m == nil {
+func (regex *Regexp) FindStringIndex(source string) []int {
+	match, err  := regex.FindStringMatch(source)
+	if err != nil || match == nil {
 		return nil
 	}
 	result := make([]int, 2)
-	result[0] = m.Index
-	result[1] = m.Index + m.Length
+	result[0] = match.Index
+	result[1] = match.Index + match.Length
 	return result
 }
 
@@ -495,11 +495,11 @@ func (regex *Regexp) FindAllSubmatchIndex(b []byte, n int) [][]int {
 // the expression, as defined by the 'All' description in the package
 // comment.
 // A return value of nil indicates no match.
-func (regex *Regexp) FindAllStringSubmatchIndex(s string, n int) [][]int {
+func (regex *Regexp) FindAllStringSubmatchIndex(source string, n int) [][]int {
 	if n < 0 {
-		n = len(s) + 1
+		n = len(source) + 1
 	}
-	m, err  := regex.FindStringMatch(s)
+	m, err  := regex.FindStringMatch(source)
 	if err != nil || m == nil {
 		return nil
 	}
@@ -507,7 +507,7 @@ func (regex *Regexp) FindAllStringSubmatchIndex(s string, n int) [][]int {
 	for m != nil && m.Index < n {
 		indices := getIndicesFromGroup(m)
 		result = append(result, indices)
-		if indices[1] >= len(s) {
+		if indices[1] >= len(source) {
 			break
 		}
 		m, _ = regex.FindNextMatch(m)
@@ -533,13 +533,13 @@ func getIndicesFromGroup(match *Match) []int {
 // matches, if any, of its subexpressions, as defined by the 'Submatch' and
 // 'Index' descriptions in the package comment.
 // A return value of nil indicates no match.
-func (regex *Regexp) FindStringSubmatchIndex(s string) []int {
-	m, err  := regex.FindStringMatch(s)
-	if err != nil || m == nil {
+func (regex *Regexp) FindStringSubmatchIndex(source string) []int {
+	match, err  := regex.FindStringMatch(source)
+	if err != nil || match == nil {
 		return nil
 	}
 	var result []int
-	for _, group := range m.Groups() {
+	for _, group := range match.Groups() {
 		if len(group.Captures) > 0 {
 			lastCapture := group.Captures[len(group.Captures) - 1]
 			result = append(result, lastCapture.Index, lastCapture.Index + lastCapture.Length)
