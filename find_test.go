@@ -122,20 +122,26 @@ var findTests = []FindTest{
 }
 
 func TestFindAllStringIndex(t *testing.T) {
-	for _, test := range findTests {
-		testFindAllIndex(&test, MustCompile(test.pat).FindAllStringIndex(test.text, -1), t)
+	for i := -1; i < 3; i++ {
+		for _, test := range findTests {
+			testFindAllIndex(&test, MustCompile(test.pat).FindAllStringIndex(test.text, i), t, i)
+		}
 	}
 }
 
 func TestFindAllSubmatchIndex(t *testing.T) {
-	for _, test := range findTests {
-		testFindAllSubmatchIndex(&test, MustCompile(test.pat).FindAllSubmatchIndex([]byte(test.text), -1), t)
+	for i := -1; i < 3; i++ {
+		for _, test := range findTests {
+			testFindAllSubmatchIndex(&test, MustCompile(test.pat).FindAllSubmatchIndex([]byte(test.text), i), t, i)
+		}
 	}
 }
 
 func TestFindAllStringSubmatchIndex(t *testing.T) {
-	for _, test := range findTests {
-		testFindAllSubmatchIndex(&test, MustCompile(test.pat).FindAllStringSubmatchIndex(test.text, -1), t)
+	for i := -1; i < 3; i++ {
+		for _, test := range findTests {
+			testFindAllSubmatchIndex(&test, MustCompile(test.pat).FindAllStringSubmatchIndex(test.text, i), t, i)
+		}
 	}
 }
 
@@ -153,19 +159,25 @@ func TestFindStringIndex(t *testing.T) {
 
 func TestFindAllStringSubmatch(t *testing.T) {
 	for _, test := range findTests {
-		result := MustCompile(test.pat).FindAllStringSubmatch(test.text, -1)
-		switch {
-		case test.matches == nil && result == nil:
-		// ok
-		case test.matches == nil && result != nil:
-			t.Errorf("expected no match; got one: %s", test)
-		case test.matches != nil && result == nil:
-			t.Errorf("expected match; got none: %s", test)
-		case len(test.matches) != len(result):
-			t.Errorf("expected %d matches; got %d: %s", len(test.matches), len(result), test)
-		case test.matches != nil && result != nil:
-			for k, match := range test.matches {
-				testSubmatchString(&test, k, match, result[k], t)
+		for i := -1; i < 3; i++ {
+			result := MustCompile(test.pat).FindAllStringSubmatch(test.text, i)
+			expectedMatches := i
+			if expectedMatches == -1 || len(test.matches) < expectedMatches {
+				expectedMatches = len(test.matches)
+			}
+			switch {
+			case test.matches == nil && result == nil:
+			// ok
+			case test.matches == nil && result != nil:
+				t.Errorf("expected no match; got one: %s", test)
+			case test.matches != nil && result == nil && expectedMatches != 0:
+				t.Errorf("expected match; got none: %s", test)
+			case len(result) != expectedMatches:
+				t.Errorf("expected %d matches; got %d: %s", expectedMatches, len(result), test)
+			case test.matches != nil && result != nil:
+				for k, _ := range result {
+					testSubmatchString(&test, k, test.matches[k], result[k], t)
+				}
 			}
 		}
 	}
@@ -204,22 +216,27 @@ func build(n int, x ...int) [][]int {
 	return ret
 }
 
-func testFindAllIndex(test *FindTest, result [][]int, t *testing.T) {
+func testFindAllIndex(test *FindTest, result [][]int, t *testing.T, expectedMatches int) {
 	switch {
 	case test.matches == nil && result == nil:
 	// ok
 	case test.matches == nil && result != nil:
 		t.Errorf("%s: expected no match; got one: %s", test.pat, test)
-	case test.matches != nil && result == nil:
-		t.Errorf("%s: expected match; got none: %s", test.pat, test)
+	case test.matches != nil && result == nil && expectedMatches != 0:
+		t.Errorf("%s: expected %d matches; got none: %s", test.pat, expectedMatches, test)
 	case test.matches != nil && result != nil:
-		if len(test.matches) != len(result) {
-			t.Errorf("%s: expected %d matches; got %d: %s", test.pat, len(test.matches), len(result), test)
+		if expectedMatches == -1 || len(test.matches) < expectedMatches {
+			expectedMatches = len(test.matches)
+		}
+		if len(result) != expectedMatches {
+			t.Errorf("%s: expected %d matches; got %d: %s", test.pat, expectedMatches, len(result), test)
 			return
 		}
-		for k, e := range test.matches {
-			if e[0] != result[k][0] || e[1] != result[k][1] {
-				t.Errorf("%s: match %d: expected %v got %v: %s", test.pat, k, e, result[k], test)
+		for k, e := range result {
+			for j, _ := range result[k] {
+				if e[j] != result[k][j] {
+					t.Errorf("%s: match %d: expected %v got %v: %s", test.pat, k, e, result[k], test)
+				}
 			}
 		}
 	}
@@ -238,18 +255,21 @@ func testFindSubmatchIndex(test *FindTest, result []int, t *testing.T) {
 	}
 }
 
-func testFindAllSubmatchIndex(test *FindTest, result [][]int, t *testing.T) {
+func testFindAllSubmatchIndex(test *FindTest, result [][]int, t *testing.T, expectedMatches int) {
+	if expectedMatches == -1 || len(test.matches) < expectedMatches {
+		expectedMatches = len(test.matches)
+	}
 	switch {
 	case test.matches == nil && result == nil:
 	// ok
 	case test.matches == nil && result != nil:
 		t.Errorf("%s: expected no match; got one: %s", test.pat, test)
-	case test.matches != nil && result == nil:
+	case test.matches != nil && result == nil && expectedMatches != 0:
 		t.Errorf("%s: expected match; got none: %s", test.pat, test)
-	case len(test.matches) != len(result):
-		t.Errorf("%s: expected %d matches; got %d: %s", test.pat, len(test.matches), len(result), test)
+	case len(result) != expectedMatches:
+		t.Errorf("%s: expected %d matches; got %d: %s", test.pat, expectedMatches, len(result), test)
 	case test.matches != nil && result != nil:
-		for k, match := range test.matches {
+		for k, match := range result {
 			testSubmatchIndices(test, k, match, result[k], t)
 		}
 	}
