@@ -440,7 +440,7 @@ func (regex *Regexp) FindStringSubmatch(source string) []string {
 // FindAllStringIndex is the 'All' version of FindStringIndex; it returns a
 // slice of all successive matches of the expression, as defined by the 'All'
 // description in the package comment.
-// Checks up to n characters or all if n is negative.
+// Checks up to n matches or all if n is negative.
 // A return value of nil indicates no match.
 func (regex *Regexp) FindAllStringIndex(source string, n int) [][]int {
 	if n < 0 {
@@ -451,7 +451,7 @@ func (regex *Regexp) FindAllStringIndex(source string, n int) [][]int {
 		return nil
 	}
 	var result [][]int
-	for match != nil && match.Index < n {
+	for match != nil && n > 0 {
 		indices := make([]int, 2)
 		indices[0] = match.Index
 		indices[1] = match.Index + match.Length
@@ -463,6 +463,7 @@ func (regex *Regexp) FindAllStringIndex(source string, n int) [][]int {
 		if err != nil {
 			return nil
 		}
+		n--
 	}
 	return result
 }
@@ -504,13 +505,14 @@ func (regex *Regexp) FindAllStringSubmatchIndex(source string, n int) [][]int {
 		return nil
 	}
 	var result [][]int
-	for m != nil && m.Index < n {
+	for m != nil && n > 0 {
 		indices := getIndicesFromGroup(m)
 		result = append(result, indices)
 		if indices[1] >= len(source) {
 			break
 		}
 		m, _ = regex.FindNextMatch(m)
+		n--
 	}
 	return result
 }
